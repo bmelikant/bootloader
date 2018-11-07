@@ -3,6 +3,9 @@
 ; FAT16 and FAT32 file systems.
 ;------------------------------------------------------------------------------------------------------------
 
+%ifndef _FAT_INC
+%define _FAT_INC
+
 %define FAT12 1
 %define FAT16 2
 %define FAT32 3
@@ -10,8 +13,6 @@
 ; default file system for build is FAT12
 %ifndef FILESYSTEM_TYPE
 %define FILESYSTEM_TYPE FAT12
-%else
-%error "No filesystem was defined. Please specify a filesystem of type FAT12, FAT16, or FAT32"
 %endif
 
 ; define the OEM name of the operating system (currently MISSY OS, can be overridden)
@@ -19,7 +20,9 @@
 %define _OEM_NAME 'MISSY OS'
 %endif
 
+%if (FILESYSTEM_TYPE == FAT12)
 %include "fat12.inc"
+%endif
 
 ;-----------------------------------------------------------------
 ; FAT12 BIOS parameter block and base block for FAT16 / FAT32
@@ -65,4 +68,6 @@ _biosParameterBlockFAT12End:
 
 %if (_biosParameterBlockFAT12End - _BPB_SYSTEM_ID) != 8
 %error "Format error: The system id field must be 8 bytes to conform to FAT12 spec"
+%endif
+
 %endif

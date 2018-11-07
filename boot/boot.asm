@@ -16,12 +16,14 @@ _entryPt:
 _bootCode:
 
 	; set up the segment registers to point to segment 0x00
+	cli
 	xor ax,ax
 	mov ds,ax
 	mov es,ax
 
 	mov ss,ax
 	mov sp,0x9000       ; locate the stack above boot code
+	sti
 
 _loadOsImage:
 
@@ -29,7 +31,14 @@ _loadOsImage:
 	mov si,_searchingFileStr
 	call _bootldrPrintLine
 
-; included routines
+	; just halt for now
+	cli
+	jmp $
+
+;------------------------------
+; included function files
+;------------------------------
+
 %include "print.inc"
 
 ;--------------------------------------------------------------------------------------------
