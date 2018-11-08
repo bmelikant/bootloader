@@ -5,6 +5,10 @@
 ; define the defaults for the FAT12 bios parameter block
 %if (FILESYSTEM_TYPE == FAT12)
 
+%ifdef _USE_INT13_EXTENSIONS
+%undef _USE_INT13_EXTENSIONS
+%endif
+
 ; these properties are always for FAT12
 %define _BYTES_PER_SECTOR 512
 %define _SECTORS_PER_CLUSTER 1

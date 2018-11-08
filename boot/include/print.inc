@@ -1,3 +1,6 @@
+%ifndef _PRINT_INC
+%define _PRINT_INC
+
 ;--------------------------------------------------------------------------------------------------------
 ; @file print.inc: this file defines a simple function to print early strings to the teletype display
 ; It calls the BIOS from real mode to do it's work
@@ -33,3 +36,6 @@ _bootldrPrintLine:
 	mov al,0x0a			; carriage return
 	int 0x10			; print it
 	ret					; return to caller
+
+; _PRINT_INC
+%endif

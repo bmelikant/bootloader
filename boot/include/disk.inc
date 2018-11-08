@@ -30,11 +30,11 @@ _lbaToChs:
 	xor dx,dx
 
 	; second calculation is head: head = (lba % (SECTORS_PER_TRACK * 2)) / SECTORS_PER_TRACK
-	div word [_BPB_HEADS_PER_CYLINDER]
+	div word [_BPB_NUMBER_OF_HEADS]
 	mov byte [_head],dl
 
 	; we already have the sector value from the above calculation: track = (lba / (SECTORS_PER_TRACK * 2))
-	mov byte [_sector],al
+	mov byte [_cylinder],al
 	ret
 
 ;------------------------------------------------------------------------------
@@ -56,7 +56,8 @@ _readSectors:
 	push cx
 
 	call _lbaToChs
-	mov ax,0x0201				; ah = bios function 2, al = read single sector
+	mov ah,0x02
+	mov al,0x01				; ah = bios function 2, al = read single sector
 	mov ch,byte [_cylinder]
 	mov cl,byte [_sector]
 	mov dh,byte [_head]
@@ -76,23 +77,26 @@ _readSectors:
 	pop ax
 
 	jnz .sectorLoop
+
+	stc
 	jmp .readComplete
 
 .readSuccess:
 
 %ifdef _PRINT_LOADING_PROGRESS
-	mov si,loadProgressString
-	call _bootldrPrintLn
+	mov si,_loadProgressString
+	call _bootldrPrintLine
 %endif
 
 	; restore to move on to the next sector
-	pop ax
-	pop bx
 	pop cx
+	pop bx
+	pop ax
 
 	add bx,word [_BPB_BYTES_PER_SECTOR]
 	inc ax
-	loop readSectors
+	loop _readSectors
+	clc
 
 .readComplete:
 
