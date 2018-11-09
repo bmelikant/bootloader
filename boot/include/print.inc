@@ -35,6 +35,8 @@ _bootldrPrintLine:
 
 	mov al,0x0a			; carriage return
 	int 0x10			; print it
+	mov al,0x0d
+	int 0x10
 	ret					; return to caller
 
 ; _PRINT_INC

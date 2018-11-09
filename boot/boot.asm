@@ -3,7 +3,10 @@
 ; Ben Melikant, 11/6/2018 (why on earth am I doing this in 2018???)
 ;-----------------------------------------------------------------------------------
 
-%define _DISK_BUFFER 0x200
+%define _DISK_BUFFER 		0x200
+%define _OS_LOAD_SEGMENT 	0x0050
+%define _OS_LOAD_OFFSET 	0x0000
+
 %define _PRINT_LOADING_PROGRESS
 
 [org 0x0]
@@ -15,7 +18,7 @@ _entryPt:
 	nop
 
 ; this is where the BIOS parameter block gets loaded in
-%include "fat.inc"
+%include "bpb.inc"
 
 _bootCode:
 
@@ -27,7 +30,7 @@ _bootCode:
 
 	xor ax,ax
 	mov ss,ax
-	mov sp,0x9000       ; locate the stack above boot code
+	mov sp,0xffff       ; locate the stack above boot code
 	sti
 
 _loadOsImage:
@@ -46,9 +49,20 @@ _loadOsImage:
 	call _parseRootDirectory
 	jc .findError
 
-	; for now just print the success status
+	; found file, print success message. This will be trimmed if space won't allow it
 	mov si,_fileFoundStr
 	call _bootldrPrintLine
+
+	; now load the second stage file. bx must contain the destination buffer for the FAT
+	mov bx,_DISK_BUFFER
+	call _readStage2Image
+	jc .readError
+
+	; we made it here with no carry; the file was loaded
+	push word _OS_LOAD_SEGMENT
+	push word _OS_LOAD_OFFSET
+	retf
+
 	jmp .halt
 
 .readError:
@@ -72,6 +86,7 @@ _loadOsImage:
 ;------------------------------
 
 %include "print.inc"
+%include "fat.inc"
 %include "disk.inc"
 
 ;--------------------------------------------------------------------------------------------

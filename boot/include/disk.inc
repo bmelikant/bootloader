@@ -77,7 +77,6 @@ _readSectors:
 	pop ax
 
 	jnz .sectorLoop
-
 	stc
 	jmp .readComplete
 
